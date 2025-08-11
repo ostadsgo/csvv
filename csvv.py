@@ -4,8 +4,14 @@ Create a csv viewr using python and built-in libraries.
 Aug 11 2025
 """
 
-import csv
+# TODO: Create line number
+# TODO: Get head and tail of the data
+# TODO: Trim empty line
+# TODO: Do some useful stats at the end (like ave, max, min)
+# FIX: 
 
+import csv
+import sys
 
 def read(filename: str):
     with open(filename, "r") as csv_file:
@@ -26,15 +32,15 @@ def max_len(data):
     return mx
 
 
-def view():
-    data = read("sample.csv")
+def view(data):
     header = data[0]
 
     max_size = max_len(data)
-    print('-' * (sum(max_size) + 3 * len(max_size) - 1))
+    print('-' * (sum(max_size) + 3 * len(max_size) + 2))
     s = ""
     for h, mx in zip(header, max_size):
-        s += f"{h:<{mx}} | "
+        s += f"| {h:<{mx}} "
+    s += " | " # last
     print(s)
     print("-" * (len(s) - 1))
 
@@ -42,13 +48,20 @@ def view():
     for row in data:
         ss = ""
         for item, mx in zip(row, max_size):
-            ss += f"{item:<{mx}} | "
+            ss += f"| {item:<{mx}} "
+        ss += " | "
         print(ss)
-    print("-" * (len(s) - 1))
+    print("-" * (len(s)-1))
 
 
 def main():
-    view()
+    if len(sys.argv) < 2:
+        print("Usage: \n\tpython csvv.py <csv_file>")
+        return
+
+    filename = sys.argv[1]
+    data = read(filename)
+    view(data)
 
 
 if __name__ == "__main__":
