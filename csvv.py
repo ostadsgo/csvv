@@ -8,14 +8,14 @@ Aug 11 2025
 
 
 # [DONE]: Create line number
-# TODO: Get head and tail of the data
+# [DONE]: Get head and tail of the data
 # TODO: Trim empty line
 # TODO: Do some useful stats at the end (like ave, max, min)
 # [DONE]: Get specific row and column
-# TODO: Head and tail of the data 
+# [DONE]: Head and tail of the data 
 # TODO: Defualt view should trim middle part for large data.
 
-# FIX:
+# FIX: Generate number before string format
 
 import csv
 import argparse
@@ -33,9 +33,8 @@ def transponse(data):
     return list(zip(*data))
 
 
-def max_len(data):
+def max_len(columns):
     mx = []
-    columns = transponse(data)
     for column in columns:
         mx.append(len(max(column, key=len)))
     return mx
@@ -46,17 +45,19 @@ def max_cell_length(row):
 
 
 def view(data: list[Row]):
+    print(transponse(data))
+    columns = transponse(data)
+    max_size = max_len(columns)
 
-    max_size = max_len(data)
     # TOP Line
-    print("-" * (sum(max_size) + 3 * len(max_size) + 8))
+    print("-" * (sum(max_size) + 3 * len(max_size) + 2))
 
     # Header
     header = data.pop(0)
     s = ""
     for h, mx in zip(header, max_size):
         s += f"| {h:<{mx}} "
-    s = f"| ROW {s} | "
+    s = f"{s} | "
     print(s)
     print("-" * (len(s) - 1))
 
@@ -65,7 +66,7 @@ def view(data: list[Row]):
         ss = ""
         for cell, mx in zip(row, max_size):
             ss += f"| {cell:<{mx}} "
-        ss = f"| {i:<3} {ss} | "
+        ss = f"{ss} | "
         print(ss)
     
     # Bottom Line
@@ -113,6 +114,18 @@ def view_tail(data):
     new_data = [header, *tail]
     view(new_data)
 
+def add_row_number(data):
+    new_data = []
+    header = data.pop(0)
+    header.insert(0, "ROW")
+    for index, row in enumerate(data, 1):
+        new_data.append([str(index)] + row)
+    new_data.insert(0, header)
+    return new_data
+
+
+
+
 def main():
     parser = argparse.ArgumentParser(description="CSV viewer")
     parser.add_argument("csvfile",  nargs='?', help="CSV file name")
@@ -129,6 +142,9 @@ def main():
         return
 
     data = read(args.csvfile)
+    data = add_row_number(data)
+    print(data)
+    print(data)
     if args.row is not None:
         view_row(data, args.row)
     elif args.column is not None:
