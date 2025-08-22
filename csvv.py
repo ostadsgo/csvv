@@ -49,23 +49,23 @@ def view(data: list[Row]):
 
     max_size = max_len(data)
     # TOP Line
-    print("-" * (sum(max_size) + 3 * len(max_size) + 2))
+    print("-" * (sum(max_size) + 3 * len(max_size) + 8))
 
     # Header
     header = data.pop(0)
     s = ""
     for h, mx in zip(header, max_size):
         s += f"| {h:<{mx}} "
-    s += " | "  # last
+    s = f"| ROW {s} | "
     print(s)
     print("-" * (len(s) - 1))
 
     # Each row
-    for row in data:
+    for i, row in enumerate(data, 1):
         ss = ""
         for cell, mx in zip(row, max_size):
             ss += f"| {cell:<{mx}} "
-        ss += " | "
+        ss = f"| {i:<3} {ss} | "
         print(ss)
     
     # Bottom Line
