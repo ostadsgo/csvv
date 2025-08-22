@@ -7,7 +7,7 @@ Aug 11 2025
 """
 
 
-# TODO: Create line number
+# [DONE]: Create line number
 # TODO: Get head and tail of the data
 # TODO: Trim empty line
 # TODO: Do some useful stats at the end (like ave, max, min)
@@ -72,8 +72,6 @@ def view(data: list[Row]):
     print("-" * (len(s) - 1))
 
 
-
-
 def view_row(data, index):
     if index < len(data):
         header = data[0]
@@ -106,13 +104,22 @@ def view_column(data, index):
 
     print("-" * (max_cell_len + 4))
 
+def view_head(data):
+    view(data[:6])
 
+def view_tail(data):
+    header = data.pop(0)
+    tail = data[-5:]
+    new_data = [header, *tail]
+    view(new_data)
 
 def main():
     parser = argparse.ArgumentParser(description="CSV viewer")
     parser.add_argument("csvfile",  nargs='?', help="CSV file name")
     parser.add_argument("-R", "--row", type=int, help="row number start from 1")
     parser.add_argument("-C", "--column", type=int, help="column number start from 1")
+    parser.add_argument("-E", "--head", action="store_true", help="Head of the csv")
+    parser.add_argument("-T", "--tail", action="store_true", help="tail of the csv")
     parser.add_argument("-V", "--version", action="store_true", help="print version of the program")
 
     args = parser.parse_args()
@@ -126,6 +133,11 @@ def main():
         view_row(data, args.row)
     elif args.column is not None:
         view_column(data, args.column)
+    elif args.head:
+        view_head(data)
+        print('head')
+    elif args.tail:
+        view_tail(data)
     else:
         view(data)
 
