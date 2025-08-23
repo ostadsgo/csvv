@@ -7,20 +7,24 @@ Aug 11 2025
 """
 
 
+## TODO
 # [DONE]: Create line number
 # [DONE]: Get head and tail of the data
 # TODO: Trim empty line
 # TODO: Do some useful stats at the end (like ave, max, min)
 # [DONE]: Get specific row and column
-# [DONE]: Head and tail of the data 
+# [DONE]: Head and tail of the data
 # TODO: Defualt view should trim middle part for large data.
+# TODO: Add custom range rows and columns options
 
-# FIX: Generate number before string format
+## FIX
+# [DONE] Generate number before string format
 
 import csv
 import argparse
 
 Row = list[str]
+
 
 def read(filename: str):
     with open(filename, "r") as csv_file:
@@ -45,7 +49,6 @@ def max_cell_length(row):
 
 
 def view(data: list[Row]):
-    print(transponse(data))
     columns = transponse(data)
     max_size = max_len(columns)
 
@@ -62,13 +65,13 @@ def view(data: list[Row]):
     print("-" * (len(s) - 1))
 
     # Each row
-    for i, row in enumerate(data, 1):
+    for row in data:
         ss = ""
         for cell, mx in zip(row, max_size):
             ss += f"| {cell:<{mx}} "
         ss = f"{ss} | "
         print(ss)
-    
+
     # Bottom Line
     print("-" * (len(s) - 1))
 
@@ -85,34 +88,20 @@ def view_row(data, index):
 
 
 def view_column(data, index):
-    columns = transponse(data)
-    if index <= 0 or index > len(columns):
-        print("ERROR: Column index out of range.")
-        return 
-    column = columns[index - 1]
-    max_cell_len = len(max(column, key=len))
-    header = column[0]
-    cells = column[1:]
+    new_data = [[row[0], row[index]] for row in data]
+    view(new_data)
 
-    print(max_cell_len)
-    print("-" * (max_cell_len + 4))
-    print(f"| {header:<{max_cell_len}} |")
-    print("-" * (max_cell_len + 4))
-
-    # ROW
-    for cell in cells:
-        print(f"| {cell:<{max_cell_len}} |")
-
-    print("-" * (max_cell_len + 4))
 
 def view_head(data):
     view(data[:6])
+
 
 def view_tail(data):
     header = data.pop(0)
     tail = data[-5:]
     new_data = [header, *tail]
     view(new_data)
+
 
 def add_row_number(data):
     new_data = []
@@ -124,16 +113,16 @@ def add_row_number(data):
     return new_data
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(description="CSV viewer")
-    parser.add_argument("csvfile",  nargs='?', help="CSV file name")
+    parser.add_argument("csvfile", nargs="?", help="CSV file name")
     parser.add_argument("-R", "--row", type=int, help="row number start from 1")
     parser.add_argument("-C", "--column", type=int, help="column number start from 1")
     parser.add_argument("-E", "--head", action="store_true", help="Head of the csv")
     parser.add_argument("-T", "--tail", action="store_true", help="tail of the csv")
-    parser.add_argument("-V", "--version", action="store_true", help="print version of the program")
+    parser.add_argument(
+        "-V", "--version", action="store_true", help="print version of the program"
+    )
 
     args = parser.parse_args()
 
@@ -143,15 +132,12 @@ def main():
 
     data = read(args.csvfile)
     data = add_row_number(data)
-    print(data)
-    print(data)
     if args.row is not None:
         view_row(data, args.row)
     elif args.column is not None:
         view_column(data, args.column)
     elif args.head:
         view_head(data)
-        print('head')
     elif args.tail:
         view_tail(data)
     else:
