@@ -17,7 +17,7 @@ Aug 11 2025
 # TODO: Defualt view should trim middle part for large data.
 # TODO: Add custom range rows and columns options
 # TODO: Connect this program features to tk table
-
+# TODO: Sort data by column name
 ## FIX
 # [DONE] Generate number before string format
 
@@ -121,7 +121,6 @@ def view_column(data, index_range):
         rows = [header]
         for row in data:
             rows.append(row[start: end])
-
         view(rows)
 
     if len(index_range) == 1:
@@ -129,16 +128,35 @@ def view_column(data, index_range):
         new_data = [[row[0], row[index]] for row in data]
         view(new_data)
 
+    # Check if there is more than 2 numbers
+    if len(index_range) > 2:
+        print("ERROR: Require start and/or end range.")
+        return 
 
-def view_head(data):
-    view(data[:6])
-
-
-def view_tail(data):
+def view_head(data, arg):
     header = data.pop(0)
-    tail = data[-5:]
-    new_data = [header, *tail]
-    view(new_data)
+
+    if isinstance(arg, str):
+        arg = int(arg)
+    
+    # Head data without header
+    rows = data[:arg]
+    data = [header, *rows]
+    view(data)
+
+
+
+
+
+def view_tail(data, arg: int | str):
+    header = data.pop(0)
+
+    if isinstance(arg, str):
+        arg = int(arg)
+
+    rows = data[-arg:]
+    data = [header, *rows]
+    view(data)
 
 
 def add_row_number(data):
@@ -156,8 +174,8 @@ def main():
     parser.add_argument("csvfile", nargs="?", help="CSV file name")
     parser.add_argument("-R", "--row",nargs='+', type=int, help="row number start from 1")
     parser.add_argument("-C", "--column", nargs='+', type=int, help="column number start from 1")
-    parser.add_argument("-E", "--head", action="store_true", help="Head of the csv")
-    parser.add_argument("-T", "--tail", action="store_true", help="tail of the csv")
+    parser.add_argument("-E", "--head", nargs="?", const=5, help="Head of the csv")
+    parser.add_argument("-T", "--tail", nargs="?", const=5, help="tail of the csv")
     parser.add_argument(
         "-V", "--version", action="store_true", help="print version of the program"
     )
@@ -175,9 +193,9 @@ def main():
     elif args.column is not None:
         view_column(data, args.column)
     elif args.head:
-        view_head(data)
+        view_head(data, args.head)
     elif args.tail:
-        view_tail(data)
+        view_tail(data, args.tail)
     else:
         view(data)
 
