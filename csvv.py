@@ -16,6 +16,7 @@ Aug 11 2025
 # [DONE]: Head and tail of the data
 # TODO: Defualt view should trim middle part for large data.
 # TODO: Add custom range rows and columns options
+# TODO: Connect this program features to tk table
 
 ## FIX
 # [DONE] Generate number before string format
@@ -76,20 +77,57 @@ def view(data: list[Row]):
     print("-" * (len(s) - 1))
 
 
-def view_row(data, index):
-    if index < len(data):
+def view_row(data, index_range):
+    # If only one number passed (specific row)
+    if len(index_range) == 1:
+        index = index_range[0]
+        if 0 < index < len(data):
+            header = data[0]
+            row = data[index]
+            rows = [header, row]
+            view(rows)
+            return
+        else:
+            print(f"ERROR: No row in index {index}")
+            return
+
+    if len(index_range) == 2:
+        start, end = index_range
+        end += 1
+        if start < end - start < end:
+            header = data[0]
+            row = data[start: end]
+            rows = [header, *row]
+            view(rows)
+            return
+        else:
+            print(f"ERROR: start is to small or end is to big.")
+            return
+
+    # Check if there is more than 2 numbers
+    if len(index_range) > 2:
+        print("ERROR: Require start and end range.")
+        return 
+
+
+def view_column(data, index_range):
+
+    if len(index_range) == 2:
+        start, end = index_range
+        end += 1
         header = data[0]
-        row = data[index]
-        rows = [header, row]
+        header = header[start: end]
+        data = data[start: end]
+        rows = [header]
+        for row in data:
+            rows.append(row[start: end])
+
         view(rows)
-        return
 
-    print("Row index out of range.")
-
-
-def view_column(data, index):
-    new_data = [[row[0], row[index]] for row in data]
-    view(new_data)
+    if len(index_range) == 1:
+        index = index_range[0]
+        new_data = [[row[0], row[index]] for row in data]
+        view(new_data)
 
 
 def view_head(data):
@@ -116,8 +154,8 @@ def add_row_number(data):
 def main():
     parser = argparse.ArgumentParser(description="CSV viewer")
     parser.add_argument("csvfile", nargs="?", help="CSV file name")
-    parser.add_argument("-R", "--row", type=int, help="row number start from 1")
-    parser.add_argument("-C", "--column", type=int, help="column number start from 1")
+    parser.add_argument("-R", "--row",nargs='+', type=int, help="row number start from 1")
+    parser.add_argument("-C", "--column", nargs='+', type=int, help="column number start from 1")
     parser.add_argument("-E", "--head", action="store_true", help="Head of the csv")
     parser.add_argument("-T", "--tail", action="store_true", help="tail of the csv")
     parser.add_argument(
