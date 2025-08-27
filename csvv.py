@@ -18,6 +18,10 @@ Aug 11 2025
 # TODO: Add custom range rows and columns options
 # TODO: Connect this program features to tk table
 # TODO: Sort data by column name
+# TODO: Create descibe feature
+# TODO: Create Info feature
+# TODO: 
+
 ## FIX
 # [DONE] Generate number before string format
 
@@ -49,12 +53,14 @@ def max_cell_length(row):
     return max(row, key=len)
 
 
-def view(data: list[Row]):
+def view(data: list[Row], stat=False):
+    table = []
     columns = transponse(data)
     max_size = max_len(columns)
 
     # TOP Line
-    print("-" * (sum(max_size) + 3 * len(max_size) + 2))
+    top_line = "-" * (sum(max_size) + 3 * len(max_size) + 2)
+    table.append(top_line)
 
     # Header
     header = data.pop(0)
@@ -62,8 +68,9 @@ def view(data: list[Row]):
     for h, mx in zip(header, max_size):
         s += f"| {h:<{mx}} "
     s = f"{s} | "
-    print(s)
-    print("-" * (len(s) - 1))
+    table.append(s)
+    l = "-" * (len(s) - 1)
+    table.append(l)
 
     # Each row
     for row in data:
@@ -71,10 +78,18 @@ def view(data: list[Row]):
         for cell, mx in zip(row, max_size):
             ss += f"| {cell:<{mx}} "
         ss = f"{ss} | "
-        print(ss)
+        table.append(ss)
 
     # Bottom Line
-    print("-" * (len(s) - 1))
+    b_line = "-" * (len(s) - 1)
+    table.append(b_line)
+
+    if stat:
+        table.insert(-2, b_line)
+
+    for row in table:
+        print(row)
+
 
 
 def view_row(data, index_range):
@@ -168,6 +183,47 @@ def add_row_number(data):
     new_data.insert(0, header)
     return new_data
 
+def sum_up(data):
+    columns = transponse(data)
+    # First column is row
+    # first item of each row is the header of the column.
+    sum_row = []
+    for column in columns[1:]:
+        result = "---"
+        for item in column[1:]:
+            if not item.isdigit():
+                break
+        else:
+            result = str(sum([float(item) for item in column[1:]]))
+
+        sum_row.append(result)
+
+    sum_row.insert(0, "sum")
+    data.append(sum_row)
+    # print(data)
+    view(data, stat=True)
+    
+
+def ave(data):
+    columns = transponse(data)
+    # First column is row
+    # first item of each row is the header of the column.
+    ave_row = []
+    for column in columns[1:]:
+        result = "---"
+        for item in column[1:]:
+            if not item.isdigit():
+                break
+        else:
+            result = str(sum([float(item) for item in column[1:]]) / len(column[1:]))
+
+        ave_row.append(result)
+
+    ave_row.insert(0, "Ave")
+    data.append(ave_row)
+    # print(data)
+    view(data, stat=True)
+
 
 def main():
     parser = argparse.ArgumentParser(description="CSV viewer")
@@ -176,6 +232,9 @@ def main():
     parser.add_argument("-C", "--column", nargs='+', type=int, help="column number start from 1")
     parser.add_argument("-E", "--head", nargs="?", const=5, help="Head of the csv")
     parser.add_argument("-T", "--tail", nargs="?", const=5, help="tail of the csv")
+    parser.add_argument("-S", "--sum", action="store_true", help="Sum up columns with number type.")
+    parser.add_argument("-A", "--ave", action="store_true", help="Average of the number typed columns")
+    parser.add_argument("-O", "--count", nargs="+", help="Count the number of items")
     parser.add_argument(
         "-V", "--version", action="store_true", help="print version of the program"
     )
@@ -188,6 +247,7 @@ def main():
 
     data = read(args.csvfile)
     data = add_row_number(data)
+
     if args.row is not None:
         view_row(data, args.row)
     elif args.column is not None:
@@ -196,6 +256,10 @@ def main():
         view_head(data, args.head)
     elif args.tail:
         view_tail(data, args.tail)
+    elif args.sum:
+        sum_up(data)
+    elif args.ave:
+        ave(data)
     else:
         view(data)
 
